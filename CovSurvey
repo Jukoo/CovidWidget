@@ -37,7 +37,7 @@ attr_data        = setup_data["main_attr"]
 geoloc           = setup_data["services"]["location_service"]
 
 
-mesgout          = lambda  mesg                 : print(mesg)  
+mesgout          = lambda  mesg                 : print("|-> {}".format(mesg))  
 default_query    = lambda  url_args="countries" : api_services["main"]+url_args   
 make_request     = lambda  args                 : requests.get(args).json()  
 
@@ -57,13 +57,21 @@ def  tracker  ()  :
             )
 
     #   get  current location user  by using his ip address ... 
-    define_user     = make_request(geoloc[0x00]+user_ip)["data"]
+    try  :
+        # sometime request failed  i don't know  why ... 
+        # may the network  is  slow  !!? 
+        define_user     = make_request(geoloc[0x00]+user_ip)["data"] 
+    except :  
+        print("relaunching ...  [ no request on time]")
+        subprocess.call(["python3" , sys.argv[0]])
+
     country , continent  =  (
             define_user["country_name"] ,   
             define_user["continent_name"]
             )
+        
 
-    return  country, 
+    return  country 
 
 # collect all list  of   countries 
 mesgout("fill contry collecion list ...  ")
@@ -77,7 +85,7 @@ def   main  () :
     # your current  location will be used 
     # to make http request  and  get the related data ...  
     if  len(sys.argv) == 0x001 : 
-            country  = tracker()[0]  
+            country  = tracker()
             if country in countries_list : 
                 country_pos = countries_list.index(country)
                 data = make_request(default_query())[country_pos]
@@ -86,7 +94,7 @@ def   main  () :
     # an http request w'll be made  and fetch  the data 
     # related  to the country passed as  stdout  argument
     if   len(sys.argv)  ==  0x002 : 
-        by_country  =  sys.argv[0x001].capitalize()  
+        by_country  =  sys.argv[0x001].lower().capitalize()  
         if  by_country  in countries_list:
             country_pos=countries_list.index(by_country)
             data = make_request(default_query())[country_pos]
