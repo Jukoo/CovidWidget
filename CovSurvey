@@ -6,6 +6,7 @@ import sys
 import pip                               # require  pip  on your system ` sudo apt install python3-pip`   
 import json
 import subprocess
+from  time import sleep
 import logging as log
 
 
@@ -31,22 +32,27 @@ if   os.path.exists(CFG_FILE)  and   os.path.getsize(CFG_FILE) >  0x000  :
         setup_data =json.loads(s_setup.read())
 
 #  mapping  values   
-current_country  = setup_data["local_country"] 
+current_country  = setup_data["local_country"]
 api_services     = setup_data["services"]["apis"]  
 attr_data        = setup_data["main_attr"] 
 geoloc           = setup_data["services"]["location_service"]
 
-
 mesgout          = lambda  mesg                 : print("|-> {}".format(mesg))  
-default_query    = lambda  url_args="countries" : api_services["main"]+url_args   
-make_request     = lambda  args                 : requests.get(args).json()  
+default_query    = lambda  url_args="countries" : api_services["main"]+url_args
 
+
+try   : 
+    # sometime request failed ... 
+    make_request     = lambda  args                 : requests.get(args).json()  
+except  json.decoder.JSONDecodeError:
+    subprocess.call(["python3" , sys.argv[0]])
+    
 
 
 main_attr_data   = attr_data[0:3]  
 
 # tracking  user location   for instance  to get metadata 
-def  tracker  ()  : 
+def  tracker  ()  ->  str : 
     mesgout("fetching  your location ... ")
     track_users_loc  = make_request(geoloc[0x001])
     user_ip , user_city , user_region , loc = (
@@ -56,39 +62,54 @@ def  tracker  ()  :
             track_users_loc["loc"]          #  user  coord  location  [not yet used in the script ][data available]
             )
 
-    #   get  current location user  by using his ip address ... 
+    #   get  current location user  by using his ip address ...
+    define_user = "" 
     try  :
         # sometime request failed  i don't know  why ... 
         # may the network  is  slow  !!? 
-        define_user     = make_request(geoloc[0x00]+user_ip)["data"] 
+        define_user     = make_request(geoloc[0x00]+user_ip)["data"]
     except :  
-        print("relaunching ...  [ no request on time]")
+        mesgout("retrying  ...  [ no request on time ]")
+        sleep(2)
+        subprocess.call(["python3" , sys.argv[0]])
+        
+    return   define_user["country_name"]
+
+
+def  set_covset_once  () :  
+    global current_country
+    #  write  the configuration  once  
+    #  by default  the local_country  is null  to avoid static  value  
+    #  when   user location  was  it's make a stream to rewrite  
+    #  config file ... 
+ 
+    if len(current_country)  == 0x00  or current_country == "None"  :     
+        mesgout("Setting up your location ...")
+        setup_data["local_country"]=tracker()
+        current_country = setup_data["local_country"]
+        with open (CFG_FILE ,  "w")  as save_loc  :
+            json.dump(setup_data ,save_loc)
+            
         subprocess.call(["python3" , sys.argv[0]])
 
-    country , continent  =  (
-            define_user["country_name"] ,   
-            define_user["continent_name"]
-            )
-        
+           
 
-    return  country 
+data=None 
 
-# collect all list  of   countries 
-mesgout("fill contry collecion list ...  ")
-countries_list   = [  c["country"]  for  c in make_request(default_query()) if c["country"]] 
-
-data=None  
-
-def   main  () :  
-    global data 
+def   main  () : 
+    # collect all list  of   countries 
+    mesgout("fill contry collecion list ...  ")
+    countries_list   = [  c["country"]  for  c in make_request(default_query()) if c["country"]] 
+    global data
     # if  no argument was set 
     # your current  location will be used 
     # to make http request  and  get the related data ...  
-    if  len(sys.argv) == 0x001 : 
-            country  = tracker()
-            if country in countries_list : 
-                country_pos = countries_list.index(country)
-                data = make_request(default_query())[country_pos]
+    if  len(sys.argv) == 0x001 :
+        set_covset_once()  
+        country  = current_country  # (tracker() , current_country)[ current_country is not None ]
+        if country in countries_list : 
+            country_pos = countries_list.index(country)
+            data = make_request(default_query())[country_pos]
 
     # Otherwise   when user  specify  a country  
     # an http request w'll be made  and fetch  the data 
@@ -101,16 +122,18 @@ def   main  () :
         else : 
             log.warning("No country found ... ") 
             sys.exit(2) 
-
-
-main()
+try : 
+    main()
+except TypeError : 
+    pass 
 
 # make a  nice  display  
 formatted_row = '{:<10} | {:<10} | {:>10} | {:>10} | {:<10}| {:<10}| {:<10} |'
 print(formatted_row.format(*attr_data))  
 e_data = []
+
 if  data  is not None :  
     for es_data  in attr_data:
         e_data.append(data[es_data])
-       
+
 print(formatted_row.format(*e_data))
