@@ -122,14 +122,12 @@ def   main  () :
         if  by_country  ==  "All" : 
             data = make_request(default_query(by_country))
             formatted_row = "|".join(formatted_row.split("|")[0:4])
-            print(formatted_row.format(*main_attr_data))  
 
         elif by_country  in countries_list:
             # catch  the index  of  the current country passed  
             # + as  parameter and get  the data in that position  
             country_pos=countries_list.index(by_country)
             data = make_request(default_query())[country_pos]
-            print(formatted_row.format(*attr_data))  
         else : 
             log.warning("No country found ... ") 
             sys.exit(2) 
@@ -138,13 +136,16 @@ try :
 except TypeError : 
     pass 
 
+
 e_data = []
 if  data  is not None :   
-    if not sys.argv[1].lower().capitalize() is  not  "All" : 
-        for es_data  in attr_data     : 
+    if  len(sys.argv)  == 2 and sys.argv[1].lower().capitalize()  ==  "All" :
+        print(formatted_row.format(*main_attr_data))  
+        for es_data  in main_attr_data     :
             e_data.append(data[es_data])
-    else                              : 
-        for es_data  in main_attr_data: 
+    else   : 
+        print(formatted_row.format(*attr_data))  
+        for es_data  in attr_data:
             e_data.append(data[es_data])
 
 print(formatted_row.format(*e_data))
