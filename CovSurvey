@@ -1,5 +1,13 @@
 #!/usr/bin/python3  
 
+""" 
+  __|            __|                        
+ (     _ \\ \ /\__ \ |  |  _|\ \ / -_) |  | 
+\___|\___/ \_/ ____/\_,_|_|   \_/\___|\_, | 
+                                      ___/  XIX   
+"""
+
+
 # this  Programme  require  highly network connexion  to work well 
 import os
 import sys
@@ -47,9 +55,9 @@ try   :
 except  json.decoder.JSONDecodeError:
     subprocess.call(["python3" , sys.argv[0]])
     
-
-
 main_attr_data   = attr_data[0:4]  
+allowed_argument = attr_data[0:6]
+
 
 # tracking  user location   for instance  to get metadata 
 def  tracker  ()  ->  str : 
@@ -92,42 +100,50 @@ def  set_covset_once  () :
             
         subprocess.call(["python3" , sys.argv[0]])
 
-           
+def  find_country  ( country :str   ,  *countries_list:list ) :  
+    if   country  in countries_list : 
+        country_pos  = countries_list.index(country) 
+        return  make_request(default_query())[country_pos] 
+
+
 
 # make a  nice  display   
 formatted_row = '{:<10} | {:<10} | {:>10} | {:>10} | {:<10}| {:<10}| {:<10} |'
 data=None 
-
+country  =  None   
 def   main  () : 
     # collect all list  of   countries 
-    mesgout("fill contry collecion list ...  ")
     countries_list   = [  c["country"]  for  c in make_request(default_query()) if c["country"]] 
-    global data , formatted_row 
+    global data , formatted_row , country   
     # if  no argument was set 
     # your current  location will be used 
     # to make http request  and  get the related data ...  
     if  len(sys.argv) == 0x001 :
         set_covset_once()  
         country  = current_country  # (tracker() , current_country)[ current_country is not None ]
-        if country in countries_list : 
-            country_pos = countries_list.index(country)
-            data = make_request(default_query())[country_pos]
+        data  = find_country( country ,  *countries_list ) 
+
 
     # Otherwise   when user  specify  a country  
     # an http request w'll be made  and fetch  the data 
     # related  to the country passed as  stdout  argument
-    if   len(sys.argv)  ==  0x002 : 
+    if   len(sys.argv)  ==  0x002 :
 
         by_country  =  sys.argv[0x001].lower().capitalize()
+ 
         if  by_country  ==  "All" : 
             data = make_request(default_query(by_country))
             formatted_row = "|".join(formatted_row.split("|")[0:4])
 
         elif by_country  in countries_list:
+            mesgout("fill contry collecion list ...  ")
             # catch  the index  of  the current country passed  
-            # + as  parameter and get  the data in that position  
-            country_pos=countries_list.index(by_country)
-            data = make_request(default_query())[country_pos]
+            # + as  parameter and get  the data in that position 
+            data  = find_country( by_country ,  *countries_list ) 
+
+        elif  by_country.lower()  in allowed_argument  : 
+            country  = current_country  
+            data  = find_country( country ,  *countries_list )[by_country.lower()]
         else : 
             log.warning("No country found ... ") 
             sys.exit(2) 
@@ -137,15 +153,19 @@ except TypeError :
     pass 
 
 
-e_data = []
-if  data  is not None :   
-    if  len(sys.argv)  == 2 and sys.argv[1].lower().capitalize()  ==  "All" :
+e_data = list () 
+
+if  data  is not None and   type(data)  is not int   :   
+    if  len(sys.argv)  == 2 and sys.argv[0x001].lower().capitalize()  ==  "All" :
         print(formatted_row.format(*main_attr_data))  
         for es_data  in main_attr_data     :
             e_data.append(data[es_data])
+        print(formatted_row.format(*e_data))
     else   : 
         print(formatted_row.format(*attr_data))  
         for es_data  in attr_data:
             e_data.append(data[es_data])
+        print(formatted_row.format(*e_data))
 
-print(formatted_row.format(*e_data))
+else  :  
+    print(data) 
