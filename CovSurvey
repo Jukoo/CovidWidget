@@ -7,7 +7,6 @@
                                       ___/  XIX   
 """
 
-
 # this  Programme  require  highly network connexion  to work well 
 import os
 import sys
@@ -17,8 +16,6 @@ import subprocess
 from  time import sleep
 import logging as log
 
-
-assert   sys.platform == "linux"   # Raise Assertion Error  if  the os  is not linux  
 
 try  :
     import  requests 
@@ -55,8 +52,11 @@ try   :
 except  json.decoder.JSONDecodeError:
     subprocess.call(["python3" , sys.argv[0]])
     
-main_attr_data   = attr_data[0:4]  
-allowed_argument = attr_data[0:6]
+main_attr_data   = attr_data[0:4]   
+
+# set allowed arguments  
+allowed_argument = list(attr_data)  
+
 
 
 # tracking  user location   for instance  to get metadata 
@@ -74,7 +74,7 @@ def  tracker  ()  ->  str :
     define_user = "" 
     try  :
         # sometime request failed  i don't know  why ... 
-        # may the network  is  slow  !!? 
+        # may be my network  is  slow  !!? 
         define_user     = make_request(geoloc[0x00]+user_ip)["data"]
     except :  
         mesgout("retrying  ...  [ no request on time ]")
@@ -142,10 +142,11 @@ def   main  () :
             data  = find_country( by_country ,  *countries_list ) 
 
         elif  by_country.lower()  in allowed_argument  : 
-            country  = current_country  
+            country  = current_country 
             data  = find_country( country ,  *countries_list )[by_country.lower()]
+ 
         else : 
-            log.warning("No country found ... ") 
+            log.warning("Unknow argument... ") 
             sys.exit(2) 
 try : 
     main()
@@ -153,9 +154,10 @@ except TypeError :
     pass 
 
 
+
 e_data = list () 
 
-if  data  is not None and   type(data)  is not int   :   
+if  data  is not None and   type(data)  is not int and type(data)  is not str:      
     if  len(sys.argv)  == 2 and sys.argv[0x001].lower().capitalize()  ==  "All" :
         print(formatted_row.format(*main_attr_data))  
         for es_data  in main_attr_data     :

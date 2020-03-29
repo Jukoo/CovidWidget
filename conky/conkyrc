@@ -37,5 +37,17 @@ conky.config = {
     extra_newline = false,
 }
 conky.text = [[
-XXXXXXXXXXXXXXXXXX
+Covid-19  Watcher
+${color red} ------- 
+Covid  Status 
+${color red} -------
+Country   :${textci  600 python3 ../.CovSurvey  country}
+Active    :
+Cases     :
+TodayCases:
+Recovered :
+Critical  : 
+Death     : 
+
+
 ]]
