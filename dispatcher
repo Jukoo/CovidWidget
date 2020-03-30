@@ -1,0 +1,90 @@
+#!/bin/bash 
+
+# Dispatch  files  in the system 
+
+set -o errexit  
+
+readonly   PN=$(basename ${0^^}) ; 
+readonly   RootUID=$((0x000))
+readonly   user_name=`logname`
+readonly   f_source=CovSurvey   
+readonly   covconf=covset.cfg
+ 
+declare  -A  sysF=(
+    ["conf"]=/etc/covid/
+    ["exec"]=/usr/bin/
+)
+
+[[  "root::permission" ]]  
+{ 
+     [[   ${UID} -ne  ${RootUID} ]]  && {
+        echo -e " require  root  user  ..."   
+        read -p "root password: "  -s -t $((0x000F))
+        if [[ -n  ${REPLY} ]]  ; then 
+           sudo  -s  <<<  ${REPLY}  ./${PN,,} 
+            test $? -eq 0 ||  {
+                 echo -e "ROAuth  failed" 
+                 exit 3 
+            } 
+        else
+             exit 3 
+        fi
+     }
+}
+sed  -n  4,8p ${f_source}
+
+
+echo -e  "|-> [COVID-19] inflating logical conf  directory ..." 
+sleep $((0x0002))  
+
+default_source  () {
+    local  root_dir=${sysF["conf"]}  
+    if [[ ! -d  $root_dir ]]   ; then 
+        mkdir  $root_dir
+        [[ $?  -ne 0  ]]  && {
+            echo  -e "failed ... " 
+            exit 3 
+        }||{
+            return 0  
+        }  
+    else  
+        echo  "|-> [COVID-19] nothing to do  evrything is oOK ..." 
+        exit 0     
+    fi
+}
+
+default_source
+test $? -eq  0  && {  
+    echo  "|-> [COVID-19] Injecting DNA proteine -> ${sysF["conf"]}" 
+    sleep $((0x0002))  
+      if [[ -f  ${f_source}  ]]   ; then 
+            cp   ${f_source}   ${sysF["exec"]}
+            test $? -eq 0  &&  { 
+				echo -n "|-> [COVID-19]  Mutation "
+				if [[ -f  ${covconf}  ]] ; then
+				 sed -i "s/${covconf}/${sysF["conf"]}${covconf}"  ${sysF["exec"]}${f_source}
+				  test $? -eq 0  &&  {
+					  echo "|->  [ Done ]"
+					  echo "|->  "
+					  cp  ${covconf}  ${sysF["conf"]}
+				  [[ $? -eq $((0x000)) ]]  && {
+                      echo "|-> [COVID-19]   Adaptation ..." 
+                      `chown  ${user_name}  ${sysF["exec"]}${f_source}`
+                      `chown  ${user_name}  ${sysF["conf"]}${covconf}`
+					}
+				 }
+				else  
+					  echo "|~>  fail to found  config  file ...  "
+					  exit 3 
+				fi  
+				echo -e "[ done ]"
+			}
+            
+        else  
+            echo -e  "|-> something  wrong  :  missing  file "  
+            echo -e  "|-> please report this error  to - >  <funscript@outlook.fr>"
+            echo -e  "|-> or declare an issue  to      - >  <https://github.com/Jukoo/CovidWidget>"  
+            exit  3  
+        fi 
+
+} 

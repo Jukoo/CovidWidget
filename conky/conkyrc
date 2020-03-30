@@ -41,13 +41,11 @@ Covid-19  Watcher
 ${color red} ------- 
 Covid  Status 
 ${color red} -------
-Country   :${textci  600 python3 ../.CovSurvey  country}
-Active    :
-Cases     :
-TodayCases:
-Recovered :
-Critical  : 
-Death     : 
-
+Country    :   ${texeci  5 CovSurvey  country}
+Active     :   ${texeci  5 CovSurvey  active}
+Cases      :   ${texeci  5 CovSurvey  cases}
+#TodayCases:   ${texeci  5 CovSurvey  todayCases}
+Recovered  :   ${texeci  5 CovSurvey  recovered}
+Critical   :   ${texeci  5 CovSurvey  critical} 
 
 ]]
