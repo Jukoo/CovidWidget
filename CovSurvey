@@ -56,8 +56,7 @@ except  json.decoder.JSONDecodeError:
 main_attr_data   = attr_data[0:4]   
 
 # set allowed arguments  
-allowed_argument = list(attr_data)  
-
+allowed_argument = list(attr_data)  # making copy  of attribute data   
 
 
 # tracking  user location   for instance  to get metadata 
@@ -142,9 +141,9 @@ def   main  () :
             # + as  parameter and get  the data in that position 
             data  = find_country( by_country ,  *countries_list ) 
 
-        elif  by_country.lower()  in allowed_argument  : 
+        elif  by_country.lower() in allowed_argument or by_country.lower()   == "todaycases": 
             country  = current_country 
-            data  = find_country( country ,  *countries_list )[by_country.lower()]
+            data  = find_country( country ,  *countries_list )[(by_country.lower(),by_country[:5].lower() +by_country[5:].capitalize())[by_country.lower() == "todaycases"]]
  
         else : 
             log.warning("Unknow argument... ") 

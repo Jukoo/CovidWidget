@@ -2,18 +2,35 @@
 
 # Dispatch  files  in the system 
 
-set -o errexit  
+set -o errexit 
+
+#set -x  DEBUG   #uncomment to activate debug mode   
 
 readonly   PN=$(basename ${0^^}) ; 
 readonly   RootUID=$((0x000))
 readonly   user_name=`logname`
 readonly   f_source=CovSurvey   
 readonly   covconf=covset.cfg
+readonly   conkyrc=.conkyrc
  
 declare  -A  sysF=(
     ["conf"]=/etc/covid/
     ["exec"]=/usr/bin/
 )
+
+if [[  -f  ${conkyrc}  ]]  ; then
+    echo "|-> creating  conkyrc file  ..."
+    cp   ${conkyrc} ${HOME}
+    [[  -f  ${HOME}/${conkyrc}  ]]   && { 
+
+        echo  "|=->  [ conky set ] "
+    }||{  
+         echo "Failed  : require  cOnkYrc  file  "
+         exit 3 
+     
+     }
+
+fi 
 
 [[  "root::permission" ]]  
 { 
@@ -39,7 +56,7 @@ sleep $((0x0002))
 
 default_source  () {
     local  root_dir=${sysF["conf"]}  
-    if [[ ! -d  $root_dir ]]   ; then 
+    if [[ ! -d  $root_dir ]]  ; then 
         mkdir  $root_dir
         [[ $?  -ne 0  ]]  && {
             echo  -e "failed ... " 
@@ -62,7 +79,8 @@ test $? -eq  0  && {
             test $? -eq 0  &&  { 
 				echo -n "|-> [COVID-19]  Mutation "
 				if [[ -f  ${covconf}  ]] ; then
-				 sed -i "s/${covconf}/${sysF["conf"]}${covconf}"  ${sysF["exec"]}${f_source}
+                     conf=${sysF["conf"]}  
+				  sed -i  "s/${covconf}/\\/etc\\/covid\\/${covconf}/g" ${sysF["exec"]}${f_source}
 				  test $? -eq 0  &&  {
 					  echo "|->  [ Done ]"
 					  echo "|->  "
@@ -78,13 +96,13 @@ test $? -eq  0  && {
 					  exit 3 
 				fi  
 				echo -e "[ done ]"
-			}
-            
+			}            
         else  
             echo -e  "|-> something  wrong  :  missing  file "  
             echo -e  "|-> please report this error  to - >  <funscript@outlook.fr>"
             echo -e  "|-> or declare an issue  to      - >  <https://github.com/Jukoo/CovidWidget>"  
             exit  3  
         fi 
-
+    
+    
 } 
