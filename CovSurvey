@@ -136,7 +136,7 @@ def   main  () :
             formatted_row = "|".join(formatted_row.split("|")[0:4])
 
         elif by_country  in countries_list:
-            mesgout("fill contry collecion list ...  ")
+            mesgout("fill country collection list ...  ")
             # catch  the index  of  the current country passed  
             # + as  parameter and get  the data in that position 
             data  = find_country( by_country ,  *countries_list ) 
