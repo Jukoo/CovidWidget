@@ -12,29 +12,60 @@ readonly   user_name=`logname`
 readonly   f_source=CovSurvey   
 readonly   covconf=covset.cfg
 readonly   conkyrc=.conkyrc
+readonly   Dconky=conky.desktop
+readonly   exe=CovSurvey
+
  
 declare  -A  sysF=(
     ["conf"]=/etc/covid/
     ["exec"]=/usr/bin/
+    ["D_location"]=${HOME}/.config/autostart/
 )
+
+if  [[ -n $1 ]]  ; then 
+
+    case  $1 in  
+        "clean")
+             
+            sudo rm -r ${sysF["conf"]}
+            test $? -eq 0 && { 
+                rm  ${sysF["exec"]}${f_source}
+            }|| {
+                echo "|~>  Failed to clean  conf dir"
+                exit 2 
+            }
+         echo "clean"
+         exit 0 
+        ;; 
+    esac
+fi 
 
 if [[  -f  ${conkyrc}  ]]  ; then
     echo "|-> creating  conkyrc file  ..."
     cp   ${conkyrc} ${HOME}
     [[  -f  ${HOME}/${conkyrc}  ]]   && { 
-
-        echo  "|=->  [ conky set ] "
+        echo  "|=->  [ conky set ]"
+        echo  "[bootstrapping  destop  applet ]"  
+        cp ${Dconky} ${sysF["D_location"]} 
+        test $?  -eq 0   &&  {  
+            echo  "|->  Applet OK "
+        } || {
+            echo  "Failed  : Autostart Applet launcher  broken" 
+            exit 3 
+        }
     }||{  
-         echo "Failed  : require  cOnkYrc  file  "
+         echo "|~> Failed  : require  cOnkYrc  file  "
          exit 3 
      
      }
 
 fi 
 
-[[  "root::permission" ]]  
+
+[[  "root permission" ]] 
 { 
-     [[   ${UID} -ne  ${RootUID} ]]  && {
+
+    [[   ${UID} -ne  ${RootUID} ]]  && {
         echo -e " require  root  user  ..."   
         read -p "root password: "  -s -t $((0x000F))
         if [[ -n  ${REPLY} ]]  ; then 
@@ -46,8 +77,9 @@ fi
         else
              exit 3 
         fi
-     }
+    }
 }
+
 sed  -n  4,8p ${f_source}
 
 
@@ -89,6 +121,7 @@ test $? -eq  0  && {
                       echo "|-> [COVID-19]   Adaptation ..." 
                       `chown  ${user_name}  ${sysF["exec"]}${f_source}`
                       `chown  ${user_name}  ${sysF["conf"]}${covconf}`
+                       exec $exe
 					}
 				 }
 				else  
@@ -105,4 +138,5 @@ test $? -eq  0  && {
         fi 
     
     
-} 
+}
+

@@ -47,6 +47,7 @@ Cases           :   ${texeci  5 CovSurvey  cases}
 TodayCases :   ${texeci  5 CovSurvey  todayCases}
 Recovered   :   ${texeci  5 CovSurvey  recovered}
 Critical         :   ${texeci  5 CovSurvey  critical} 
+Deaths        :   ${texeci  5 CovSurvey  deaths} 
 
 ]]
 
