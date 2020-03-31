@@ -121,7 +121,18 @@ test $? -eq  0  && {
                       echo "|-> [COVID-19]   Adaptation ..." 
                       `chown  ${user_name}  ${sysF["exec"]}${f_source}`
                       `chown  ${user_name}  ${sysF["conf"]}${covconf}`
-                       exec $exe
+                       python3 $exe
+                       sleep 3 
+                       if  [[  -x  ${sysF["exec"]}conky ]]  ;then 
+                               conky   
+                               [[  $? -eq 0 ]] && {
+                                 echo "|-> Conky is launched"
+                                         
+                               }
+                       else 
+                           echo "|~> it seem conky was not found ..."
+                       fi 
+                       
 					}
 				 }
 				else  
