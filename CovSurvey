@@ -17,7 +17,6 @@ import subprocess
 from  time import sleep
 import logging as log
 
-
 try  :
     import  requests 
 except  : 
@@ -27,15 +26,19 @@ except  :
 #+ to set the main attributes  
 CFG_FILE = "covset.cfg" 
 
-
+# A container  for collecting  data  from API  
 setup_data =dict()   
-# load the file 
+
+# parse the configuration file to do different processing to extract the essential data
 if   os.path.exists(CFG_FILE)  and   os.path.getsize(CFG_FILE) >  0x000  :  
     with open (  CFG_FILE , "r" ) as s_setup  : # s_setup  as static_setup  
         # initializing setup_data    
         # that's contain  the  default config setup
         # it automaticly convert to  dict  type  to  better use  
         setup_data =json.loads(s_setup.read())
+else : 
+    log.error("file  Missing ... ") 
+    sys.exit(3) 
 
 #  mapping  values   
 current_country  = setup_data["local_country"]
@@ -44,22 +47,28 @@ attr_data        = setup_data["main_attr"]
 geoloc           = setup_data["services"]["location_service"]
 
 mesgout          = lambda  mesg                 : print("|-> {}".format(mesg))  
+
+# default  method  to do query  from API  url  
 default_query    = lambda  url_args="countries" : api_services["main"]+url_args
 
-
 try   : 
-    # sometime request failed ... 
+    # generic method  to  make request 
+    # but sometime  it's  crash   due to a slow network connexion  
+    # or bad  connexion  or  the remote  service  is overloaded ...  
     make_request     = lambda  args                 : requests.get(args).json()  
 except  json.decoder.JSONDecodeError:
+    mesgout("[ retrying  request ]")
     subprocess.call(["python3" , sys.argv[0]])
-    
+
+
 main_attr_data   = attr_data[0:4]   
 
 # set allowed arguments  
-allowed_argument = list(attr_data)  # making copy  of attribute data   
+allowed_argument = list(attr_data)     
 
 
-# tracking  user location   for instance  to get metadata 
+# tracking  user location  to get metadata 
+# by making request  using  ip address 
 def  tracker  ()  ->  str : 
     mesgout("fetching  your location ... ")
     track_users_loc  = make_request(geoloc[0x001])
@@ -90,7 +99,6 @@ def  set_covset_once  () :
     #  by default  the local_country  is null  to avoid static  value  
     #  when   user location  was  it's make a stream to rewrite  
     #  config file ... 
- 
     if len(current_country)  == 0x00  or current_country == "None"  :     
         mesgout("Setting up your location ...")
         setup_data["local_country"]=tracker()
@@ -100,17 +108,29 @@ def  set_covset_once  () :
             
         subprocess.call(["python3" , sys.argv[0]])
 
+# generic method  to get  related data about  the current country 
+# passed on parameter ...  
 def  find_country  ( country :str   ,  *countries_list:list ) :  
     if   country  in countries_list : 
         country_pos  = countries_list.index(country) 
         return  make_request(default_query())[country_pos] 
 
+def   usage  () :  
+    print("{}  [ option  or country name ] ".format(sys.argv[0x000][2:]))
+    allowed_argument.append("all")
+    print("options  list : \033[4m")
+    
+    for  argument in allowed_argument  : 
+        mesgout(argument)
+
+    print("\033[0m")
 
 
 # make a  nice  display   
 formatted_row = '{:<10} | {:<10} | {:>10} | {:>10} | {:<10}| {:<10}| {:<10} |'
 data=None 
 country  =  None   
+
 def   main  () : 
     # collect all list  of   countries 
     countries_list   = [  c["country"]  for  c in make_request(default_query()) if c["country"]] 
@@ -123,10 +143,9 @@ def   main  () :
         country  = current_country  # (tracker() , current_country)[ current_country is not None ]
         data  = find_country( country ,  *countries_list ) 
 
-
     # Otherwise   when user  specify  a country  
     # an http request w'll be made  and fetch  the data 
-    # related  to the country passed as  stdout  argument
+    # related  to the country passed as  argument
     if   len(sys.argv)  ==  0x002 :
 
         by_country  =  sys.argv[0x001].lower().capitalize()
@@ -146,7 +165,8 @@ def   main  () :
             data  = find_country( country ,  *countries_list )[(by_country.lower(),by_country[:5].lower() +by_country[5:].capitalize())[by_country.lower() == "todaycases"]]
  
         else : 
-            log.warning("Unknow argument... ") 
+            log.warning("\033[1;33mUnknow argument... \033[0m")
+            usage()
             sys.exit(2) 
 try : 
     main()
@@ -154,6 +174,7 @@ except TypeError :
     pass 
 
 
+#   display of data according to arguments
 
 e_data = list () 
 
