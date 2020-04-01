@@ -116,8 +116,10 @@ def  find_country  ( country :str   ,  *countries_list:list ) :
         return  make_request(default_query())[country_pos] 
 
 def   usage  () :  
-    print("{}  [ option  or country name ] ".format(sys.argv[0x000][2:]))
-    allowed_argument.append("all")
+    basename =  sys.argv[0x00].split("/") 
+    print("{}  [ option  or country name ] ".format(basename[-1]))
+    extra_args = [ "World",  "list", "help"]
+    allowed_argument.extend(extra_args)
     print("options  list : \033[4m")
     
     for  argument in allowed_argument  : 
@@ -148,10 +150,10 @@ def   main  () :
     # related  to the country passed as  argument
     if   len(sys.argv)  ==  0x002 :
 
-        by_country  =  sys.argv[0x001].lower().capitalize()
+        by_country  =  (sys.argv[0x001].lower().capitalize() ,sys.argv[0x001].upper())[len(sys.argv[0x001])   <= 0x003]
  
-        if  by_country  ==  "All" : 
-            data = make_request(default_query(by_country))
+        if  by_country  == "World" :
+            data = make_request(default_query("all"))
             formatted_row = "|".join(formatted_row.split("|")[0:4])
 
         elif by_country  in countries_list:
@@ -163,7 +165,11 @@ def   main  () :
         elif  by_country.lower() in allowed_argument or by_country.lower()   == "todaycases": 
             country  = current_country 
             data  = find_country( country ,  *countries_list )[(by_country.lower(),by_country[:5].lower() +by_country[5:].capitalize())[by_country.lower() == "todaycases"]]
- 
+        elif   by_country.lower() ==  "list" :
+            for c  in countries_list  : 
+                print("\033[4m {} \033[0m".format(c))
+        
+        elif   by_country.lower() ==  "h" or  by_country =="help" : usage()
         else : 
             log.warning("\033[1;33mUnknow argument... \033[0m")
             usage()
@@ -179,7 +185,7 @@ except TypeError :
 e_data = list () 
 
 if  data  is not None and   type(data)  is not int and type(data)  is not str:      
-    if  len(sys.argv)  == 2 and sys.argv[0x001].lower().capitalize()  ==  "All" :
+    if  len(sys.argv)  == 2 and sys.argv[0x001].lower().capitalize()  ==  "World" :
         print(formatted_row.format(*main_attr_data))  
         for es_data  in main_attr_data     :
             e_data.append(data[es_data])
