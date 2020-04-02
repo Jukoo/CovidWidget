@@ -93,12 +93,12 @@ def  tracker  ()  ->  str :
     return   define_user["country_name"]
 
 
-def  set_covset_once  () :  
+def  set_covset_once  () -> None :  
     global current_country
     #  write  the configuration  once  
     #  by default  the local_country  is null  to avoid static  value  
     #  when   user location  was  it's make a stream to rewrite  
-    #  config file ... 
+    #  config file ...        
     if len(current_country)  == 0x00  or current_country == "None"  :     
         mesgout("Setting up your location ...")
         setup_data["local_country"]=tracker()
@@ -107,6 +107,17 @@ def  set_covset_once  () :
             json.dump(setup_data ,save_loc)
             
         subprocess.call(["python3" , sys.argv[0]])
+
+
+def  set_new_location  (  location  :str  ,  *contries_list ) :
+    # give an opportunity to set  new location
+    if location  in contries_list :
+        setup_data["local_country"] =  location  
+        # rewrite the config  file  
+        with open ( CFG_FILE , "w" ) as save_new_location  : 
+            mesgout("setting  new location  to {}".format(location))
+            json.dump(setup_data , save_new_location)  
+    
 
 # generic method  to get  related data about  the current country 
 # passed on parameter ...  
@@ -118,12 +129,15 @@ def  find_country  ( country :str   ,  *countries_list:list ) :
 def   usage  () :  
     basename =  sys.argv[0x00].split("/") 
     print("{}  [ option  or country name ] ".format(basename[-1]))
-    extra_args = [ "World",  "list", "help"]
+    extra_args = [ "World",  "list", "help" , "location"]
     allowed_argument.extend(extra_args)
     print("options  list : \033[4m")
     
     for  argument in allowed_argument  : 
-        mesgout(argument)
+        if argument   == extra_args[-1]  :  
+            mesgout("{}   <country name>".format(argument))
+        else : mesgout(argument)
+        
 
     print("\033[0m")
 
@@ -136,7 +150,15 @@ country  =  None
 def   main  () : 
     # collect all list  of   countries 
     countries_list   = [  c["country"]  for  c in make_request(default_query()) if c["country"]] 
-    global data , formatted_row , country   
+    global data , formatted_row , country
+    
+    # possibility to change your  current location  
+    # to another location  if  you want 
+    if  len(sys.argv) == 0x003  :
+        if sys.argv[1].lower()  == "location" : 
+            new_location  = (sys.argv[2].lower().capitalize() , sys.argv[2].upper() ) [len(sys.argv[0x02]) <= 3 ]    
+            set_new_location(new_location , *countries_list) 
+         
     # if  no argument was set 
     # your current  location will be used 
     # to make http request  and  get the related data ...  
