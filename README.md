@@ -21,7 +21,7 @@ it relies on your IP to determine your location (unless you are using a vpn or p
 
 it's based on **conky 1.10.x** except that there are no other dependencies.
  
-A simplist and standard desing       
+A simplist and standard design    
 if you are a regular user on conky you can modify the .conkyrc file for a design that suits you.  
 
 ![IMG](IMG/schoot.png)
@@ -35,8 +35,7 @@ To install it is simple
 
  . /dispatcher   
 ```
-  [Slap]
-
+![gif install](IMG/demo.gif)
 
 that's it. 
 
@@ -51,9 +50,12 @@ the Command Line Version is available in your system as soon as you launch the i
 CovSurvey [ option or country ] 
 ``` 
 
-[gif]
-by default if you don't specify anything it takes your default location and display the
-necessary   informations   
+![scshoot](IMG/aworld.png)
+![scshoot](IMG/ahelp.png)
+![scshoot](IMG/acountry.png)
+
+
+by default if you don't specify anything it takes your default location and display the necessary   informations   
 
 #  Uninstall 
 
