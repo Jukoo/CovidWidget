@@ -56,7 +56,7 @@ try   :
     # but sometime  it's  crash   due to a slow network connexion  
     # or bad  connexion  or  the remote  service  is overloaded ...  
     make_request     = lambda  args                 : requests.get(args).json()  
-except  json.decoder.JSONDecodeError:
+except :
     mesgout("[ retrying  request ]")
     subprocess.call(["python3" , sys.argv[0]])
 
