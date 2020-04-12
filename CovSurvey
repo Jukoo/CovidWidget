@@ -141,7 +141,19 @@ def   usage  () :
 
     print("\033[0m")
 
-
+def  suggest (user_args  , *args_stdin:list ) :
+    #   suggesting  user   by doing some research by coutry name 
+    #   ex  :  sys.argv[0]  chi  
+    #    suggesting  - >  china  or  chile
+    incre=0  
+    for args in args_stdin :   
+        if user_args in args_stdin: break
+        arg_match = args[0:len(user_args)]
+        if  arg_match == user_args.capitalize(): 
+            mesgout("did you mean -> \033[4;34m{}\033[0m ".format(args)) 
+      
+      
+      
 # make a  nice  display   
 formatted_row = '{:<10} | {:<10} | {:>10} | {:>10} | {:<10}| {:<10}| {:<10} |'
 data=None 
@@ -179,6 +191,7 @@ def   main  () :
             formatted_row = "|".join(formatted_row.split("|")[0:4])
 
         elif by_country  in countries_list:
+             
             mesgout("fill country collection list ...  ")
             # catch  the index  of  the current country passed  
             # + as  parameter and get  the data in that position 
@@ -194,6 +207,7 @@ def   main  () :
         elif   by_country.lower() ==  "h" or  by_country =="help" : usage()
         else : 
             log.warning("\033[1;33mUnknow argument... \033[0m")
+            suggest(by_country , *countries_list) 
             usage()
             sys.exit(2) 
 try : 
