@@ -48,17 +48,14 @@ geoloc           = setup_data["services"]["location_service"]
 
 mesgout          = lambda  mesg                 : print("|-> {}".format(mesg))  
 
-# default  method  to do query  from API  url  
+# default  method  to do query  from API  url
 default_query    = lambda  url_args="countries" : api_services["main"]+url_args
 
-try   : 
-    # generic method  to  make request 
-    # but sometime  it's  crash   due to a slow network connexion  
-    # or bad  connexion  or  the remote  service  is overloaded ...  
-    make_request     = lambda  args                 : requests.get(args).json()  
-except :
-    mesgout("[ retrying  request ]")
-    subprocess.call(["python3" , sys.argv[0]])
+# generic method  to  make request 
+# but sometime  it's  crash   due to a slow network connexion  
+# or bad  connexion  or  the remote  service  is overloaded ...  
+make_request     = lambda  args                 : requests.get(args).json()  
+
 
 
 main_attr_data   = attr_data[0:4]   
@@ -214,11 +211,14 @@ try :
     main()
 except TypeError : 
     pass 
+except :
+    mesgout("[ retrying  request ]")
+    subprocess.call(["python3" , sys.argv[0]])
 
 
-#   display of data according to arguments
+# display of data according to arguments
 
-e_data = list () 
+e_data = list ()
 
 if  data  is not None and   type(data)  is not int and type(data)  is not str:      
     if  len(sys.argv)  == 2 and sys.argv[0x001].lower().capitalize()  ==  "World" :
@@ -232,5 +232,7 @@ if  data  is not None and   type(data)  is not int and type(data)  is not str:
             e_data.append(data[es_data])
         print(formatted_row.format(*e_data))
 
-else  :  
+elif  data  is  None  :   
+    print(f"in maintenance ...")
+else : 
     print(data) 
