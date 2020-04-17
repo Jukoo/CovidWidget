@@ -211,9 +211,9 @@ try :
     main()
 except TypeError : 
     pass 
-except :
-    mesgout("[ retrying  request ]")
-    subprocess.call(["python3" , sys.argv[0]])
+except : pass 
+ #   mesgout("[ retrying  request ]")
+ #  subprocess.call(["python3" , sys.argv[0]])
 
 
 # display of data according to arguments
@@ -233,6 +233,6 @@ if  data  is not None and   type(data)  is not int and type(data)  is not str:
         print(formatted_row.format(*e_data))
 
 elif  data  is  None  :   
-    print(f"in maintenance ...")
+    print("...")
 else : 
     print(data) 

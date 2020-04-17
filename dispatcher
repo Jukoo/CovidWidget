@@ -45,7 +45,7 @@ if [[  -f  ${conkyrc}  ]]  ; then
     cp   ${conkyrc} ${HOME}
     [[  -f  ${HOME}/${conkyrc}  ]]   && { 
         echo  "|=->  [ conky set ]"
-        echo  "[bootstrapping  destop  applet ]"  
+        echo  "[bootstrapping  desktop  applet ]"  
         cp ${Dconky} ${sysF["D_location"]} 
         test $?  -eq 0   &&  {  
             echo  "|->  Applet OK "
@@ -121,7 +121,11 @@ test $? -eq  0  && {
                       echo "|-> [COVID-19]   Adaptation ..." 
                       `chown  ${user_name}  ${sysF["exec"]}${f_source}`
                       `chown  ${user_name}  ${sysF["conf"]}${covconf}`
-                       python3 $exe
+                       [[  -x ${sysF["exec"]}python3  ]]   && { 
+                           python3 $exe
+                       } || {
+                          echo "require  python3 to launch"  ; exit 2 
+                       }
                        sleep 3 
                        if  [[  -x  ${sysF["exec"]}conky ]]  ;then 
                                conky   
